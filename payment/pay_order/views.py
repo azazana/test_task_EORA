@@ -34,12 +34,11 @@ class ItemLandingPageView(TemplateView):
 
 
 class CreateCheckoutSessionView(View):
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
+    # @csrf_exempt
+    def get(self, request, *args, **kwargs):
         YOUR_DOMAIN = 'http://127.0.0.1:8000/pay_order'
         item_id = self.kwargs['id']
         item = Item.objects.get(id=item_id)
-        print(item.name)
         checkout_session = stripe.checkout.Session.create(
             line_items=[
                 {
@@ -54,8 +53,8 @@ class CreateCheckoutSessionView(View):
                 },
             ],
             mode='payment',
-            success_url=request.build_absolute_uri(reverse('cancel')),
-            cancel_url=request.build_absolute_uri(reverse('success'))
+            success_url=request.build_absolute_uri(reverse('success')),
+            cancel_url=request.build_absolute_uri(reverse('cancel'))
         )
         return JsonResponse(
             {

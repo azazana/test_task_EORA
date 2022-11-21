@@ -8,17 +8,13 @@
     <p>{{ Item.description }}</p>
     <p>{{ Item.price}}</p>
     <button id="buy-button">Buy</button>
-    {% csrf_token %}
     <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
     <script type="text/javascript">
-      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       var stripe = Stripe('{{ stripe_publishable_key }}');
       var buyButton = document.getElementById('buy-button');
       buyButton.addEventListener('click', function() {
-        fetch('{% url 'buy' Item.id %}', {method: 'POST',
-        headers: {
-        'X-CSRFToken': csrftoken
-        }})
+        fetch('{% url 'buy' Item.id %}', {method: 'GET',
+        })
         .then(function (response) {
           return response.json();
         })
