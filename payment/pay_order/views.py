@@ -47,7 +47,7 @@ class CreateCheckoutSessionView(View):
                         'product_data': {
                             'name': item.name,
                         },
-                        'unit_amount': int(item.price),
+                        'unit_amount': int(item.price*100),
                     },
                     "quantity": 1
                 },
