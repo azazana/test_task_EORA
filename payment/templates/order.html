@@ -10,8 +10,11 @@
     {% for item in order_items %}
        <li>order item {{ item.item.name}}
            price: {{item.item.price}}
-           quantity: {{item.quantity}} </li>
+           quantity: {{item.quantity}}
+           tax: {{item.item.tax}}
+       </li>
     {% endfor %}
+        <b>discount: {{order.discount}}%</b>
     </ul>
     <button id="buy-button">Buy</button>
     <script type="text/javascript" src="https://js.stripe.com/v3/"></script>

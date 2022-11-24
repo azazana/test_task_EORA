@@ -51,16 +51,25 @@ class OrderPageView(TemplateView):
 
 
 class CreateCheckoutSessionView(View):
-    # @csrf_exempt
+
     def get(self, request, *args, **kwargs):
         items = []
         if kwargs.get('id') != None:
             item_id = self.kwargs['id']
             items.append({'item': Item.objects.get(id=item_id), 'quantity': 1})
+            try:
+                discount = stripe.Coupon.retrieve(id='0')
+            except Exception:
+                discount = stripe.Coupon.create(duration="forever", id='0', percent_off=0)
         else:
             order = Order.objects.get(id=self.kwargs['id_order'])
-            items = [{'item':order_item.item,
+            items = [{'item': order_item.item,
                       'quantity': order_item.quantity} for order_item in list(OrderItem.objects.filter(order=order))]
+            try:
+                discount = stripe.Coupon.retrieve(id=f'{order.discount.percent}')
+            except Exception:
+                discount = stripe.Coupon.create(duration="forever", id=f'{order.discount.percent}',
+                                                percent_off=order.discount.percent)
         checkout_session = stripe.checkout.Session.create(
             line_items=[
                 {
@@ -71,15 +80,15 @@ class CreateCheckoutSessionView(View):
                         },
                         'unit_amount': int(item["item"].price * 100),
                     },
-                    "quantity": item['quantity']
+                    "quantity": item['quantity'],
                 } for item in items
+
             ],
+            discounts=[{'coupon': discount}],
             mode='payment',
             success_url=request.build_absolute_uri(reverse('success')),
             cancel_url=request.build_absolute_uri(reverse('cancel'))
         )
         return JsonResponse(
-            {
-                'id': checkout_session.id
-            }
+            {'id': checkout_session.id}
         )
